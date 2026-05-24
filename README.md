@@ -15,7 +15,7 @@ Aplicação web que lista APIs públicas selecionadas, permite testar a disponib
 | HTTP Client | axios |
 | Monitoramento | Dynatrace (OneAgent ou OpenTelemetry SDK) |
 | Documentação | Swagger UI (`swagger-ui-express`) |
-| Deploy (sugestão) | Docker Compose / Vercel |
+| Deploy | Vercel |
 
 ---
 
@@ -23,7 +23,6 @@ Aplicação web que lista APIs públicas selecionadas, permite testar a disponib
 
 - [Node.js](https://nodejs.org/) **v18+**
 - [npm](https://www.npmjs.com/) v9+ (vem com o Node)
-- _(Opcional)_ [Docker](https://www.docker.com/) e Docker Compose
 
 Verifique as versões instaladas:
 
@@ -73,14 +72,6 @@ npm run dev
 ```
 
 O Vite já está configurado com **proxy** para redirecionar `/api/*` ao backend. Nenhuma configuração extra necessária.
-
-### Opção 2 — Docker Compose
-
-```bash
-docker-compose up --build
-# Backend em http://localhost:3001
-# Frontend em http://localhost:5173
-```
 
 ---
 
@@ -200,7 +191,6 @@ api-monitor/
 │       │   └── probeService.js  # Health check com axios
 │       └── index.js             # Entry point
 │
-├── docker-compose.yml
 ├── vercel.json
 └── README.md
 ```
