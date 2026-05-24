@@ -1,0 +1,82 @@
+[
+  {
+    "id": "dog-ceo",
+    "name": "Dog CEO",
+    "category": "Animals",
+    "description": "Random dog images and breed lists.",
+    "probeUrl": "https://dog.ceo/api/breeds/list/all",
+    "docsUrl": "https://dog.ceo/dog-api/documentation"
+  },
+  {
+    "id": "open-notify",
+    "name": "Open Notify (ISS)",
+    "category": "Science",
+    "description": "Current number of people in space and ISS location.",
+    "probeUrl": "http://api.open-notify.org/astros.json",
+    "docsUrl": "http://open-notify.org/Open-Notify-API/"
+  },
+  {
+    "id": "coingecko",
+    "name": "CoinGecko",
+    "category": "Finance",
+    "description": "Cryptocurrency market data — ping endpoint.",
+    "probeUrl": "https://api.coingecko.com/api/v3/ping",
+    "docsUrl": "https://www.coingecko.com/en/api/documentation"
+  },
+  {
+    "id": "pokeapi",
+    "name": "PokeAPI",
+    "category": "Games",
+    "description": "All Pokémon data you will ever need.",
+    "probeUrl": "https://pokeapi.co/api/v2/pokemon/1",
+    "docsUrl": "https://pokeapi.co/docs/v2"
+  },
+  {
+    "id": "open-meteo",
+    "name": "Open Meteo",
+    "category": "Weather",
+    "description": "Free weather forecast API — no API key required.",
+    "probeUrl": "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0&current_weather=true",
+    "docsUrl": "https://open-meteo.com/en/docs"
+  },
+  {
+    "id": "jokeapi",
+    "name": "JokeAPI",
+    "category": "Entertainment",
+    "description": "A RESTful API delivering jokes in many categories.",
+    "probeUrl": "https://v2.jokeapi.dev/joke/Any?type=single",
+    "docsUrl": "https://jokeapi.dev/"
+  },
+  {
+    "id": "github-api",
+    "name": "GitHub (public)",
+    "category": "Development",
+    "description": "GitHub's public REST API root endpoint.",
+    "probeUrl": "https://api.github.com",
+    "docsUrl": "https://docs.github.com/en/rest"
+  },
+  {
+    "id": "rest-countries",
+    "name": "REST Countries",
+    "category": "Geography",
+    "description": "Information about countries via REST API.",
+    "probeUrl": "https://restcountries.com/v3.1/name/brazil",
+    "docsUrl": "https://restcountries.com/"
+  },
+  {
+    "id": "advice-slip",
+    "name": "Advice Slip",
+    "category": "Misc",
+    "description": "Random advice slips from the advice slip API.",
+    "probeUrl": "https://api.adviceslip.com/advice",
+    "docsUrl": "https://api.adviceslip.com/"
+  },
+  {
+    "id": "numbers-api",
+    "name": "Numbers API",
+    "category": "Education",
+    "description": "Interesting facts about numbers.",
+    "probeUrl": "http://numbersapi.com/42",
+    "docsUrl": "http://numbersapi.com/"
+  }
+]
