@@ -78,5 +78,37 @@
     "description": "Interesting facts about numbers.",
     "probeUrl": "http://numbersapi.com/42",
     "docsUrl": "http://numbersapi.com/"
+  },
+  {
+    "id": "cat-facts",
+    "name": "Cat Facts",
+    "category": "Animals",
+    "description": "Random cat facts. Returns a JSON with fact and length.",
+    "probeUrl": "https://catfact.ninja/fact",
+    "docsUrl": "https://catfact.ninja/"
+  },
+  {
+    "id": "dictionary",
+    "name": "Free Dictionary API",
+    "category": "Development",
+    "description": "Get definitions, phonetics, and examples for English words.",
+    "probeUrl": "https://api.dictionaryapi.dev/api/v2/entries/en/hello",
+    "docsUrl": "https://dictionaryapi.dev/"
+  },
+  {
+    "id": "agify",
+    "name": "Agify.io",
+    "category": "Development",
+    "description": "Predicts the age of a person based on their first name.",
+    "probeUrl": "https://api.agify.io?name=ana",
+    "docsUrl": "https://agify.io"
+  },
+  {
+    "id": "genderize",
+    "name": "Genderize.io",
+    "category": "Development",
+    "description": "Predicts the gender of a person based on their first name.",
+    "probeUrl": "https://api.genderize.io?name=ana",
+    "docsUrl": "https://genderize.io"
   }
 ]
