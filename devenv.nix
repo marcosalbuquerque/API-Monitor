@@ -15,6 +15,7 @@
       enable = true;
       corepack.enable = true;
       lsp.enable = true;
+      npm.enable = true;
     };
     nix = {
       enable = true;
