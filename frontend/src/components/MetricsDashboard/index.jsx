@@ -43,8 +43,6 @@ function formatTime(ts) {
   ).padStart(2, "0")}`;
 }
 
-// TODO: The MetricsDashboard its not working properly. It need make two requests to show the line, need fix this...
-
 export default function MetricsDashboard({ refreshKey = 0, apis = [] }) {
   const [metrics, setMetrics] = useState([]);
 
@@ -103,12 +101,17 @@ export default function MetricsDashboard({ refreshKey = 0, apis = [] }) {
       return acc;
     }, {});
 
+    // Acumula o último valor conhecido de cada API a cada ponto.
+    // Sem isso cada linha só tem um ponto real e os demais ficam null,
+    // formando segmentos soltos — a linha só aparece com ≥2 requests
+    // para a mesma API. Com lastSeen a linha aparece desde o 1º request.
+    const lastSeen = {};
     const data = ordered.map((m, idx) => {
+      lastSeen[m.apiName] = m.latencyMs;
       const row = { request: idx + 1, time: formatTime(m.timestamp) };
       keys.forEach((k) => {
-        row[k] = null;
+        row[k] = lastSeen[k] ?? null;
       });
-      row[m.apiName] = m.latencyMs;
       return row;
     });
 

@@ -65,11 +65,13 @@ export default function Home() {
     try {
       await probeApi(api.id);
       pushNotification("success", `Request succeeded: ${api.name}`);
-
     } catch (err) {
       console.error("Probe failed", err);
       const message = err?.response?.data?.message || err?.message || "Request failed";
       pushNotification("error", `${api.name}: ${message}`);
+    } finally {
+      // Sinaliza o MetricsDashboard para buscar os dados atualizados imediatamente
+      setMetricsRefreshKey((k) => k + 1);
     }
   };
 
