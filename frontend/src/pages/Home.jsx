@@ -8,12 +8,14 @@ import Header from "../components/Header";
 import useChangeTheme from "../hooks/useChangeTheme";
 import { getApis, probeApi } from "../services/api";
 import Notification from "../components/Notification";
+import MetricsDashboard from "../components/MetricsDashboard";
 
 export default function Home() {
   const { darkMode, setDarkMode } = useChangeTheme();
   const [notifications, setNotifications] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [apis, setApis] = useState([]);
+  const [metricsRefreshKey, setMetricsRefreshKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +88,7 @@ export default function Home() {
           ))}
         </div>
         <Hero />
+        <MetricsDashboard refreshKey={metricsRefreshKey} apis={apis} />
         <CategoryFilter
           categories={categories}
           activeCategory={activeCategory}
