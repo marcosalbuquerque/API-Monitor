@@ -1,6 +1,6 @@
 import ApiCard from "../ApiCard";
 
-export default function ApiList({ apis, onTryOut }) {
+export default function ApiList({ apis, onTryOut, results = {}, loadingById = {} }) {
   return (
     <section id="apis" className="mx-auto max-w-7xl px-6 pb-16">
       <div className="mt-8 flex items-end justify-between gap-4">
@@ -16,7 +16,13 @@ export default function ApiList({ apis, onTryOut }) {
 
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {apis.map((api) => (
-          <ApiCard key={api.key} api={api} onTryOut={onTryOut} />
+          <ApiCard
+            key={api.id ?? api.key}
+            api={api}
+            onTryOut={onTryOut}
+            lastResult={results[api.id]}
+            isLoading={Boolean(loadingById[api.id])}
+          />
         ))}
       </div>
 

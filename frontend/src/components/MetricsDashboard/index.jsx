@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -10,9 +10,7 @@ import {
   Legend,
 } from "recharts";
 
-import { getMetrics } from "../../services/api";
-
-const POLL_MS = 4000;
+const DEFAULT_POLL_MS = 4000;
 const MAX_POINTS = 30;
 
 const COLORS = [
@@ -43,9 +41,12 @@ function formatTime(ts) {
   ).padStart(2, "0")}`;
 }
 
-export default function MetricsDashboard({ refreshKey = 0, apis = [] }) {
-  const [metrics, setMetrics] = useState([]);
-
+export default function MetricsDashboard({
+  metrics = [],
+  apis = [],
+  isLoading = false,
+  pollMs = DEFAULT_POLL_MS,
+}) {
   const idToName = useMemo(() => {
     return apis.reduce((acc, api) => {
       acc[api.id] = api.name;
@@ -53,44 +54,8 @@ export default function MetricsDashboard({ refreshKey = 0, apis = [] }) {
     }, {});
   }, [apis]);
 
-  useEffect(() => {
-    let active = true;
-
-    async function load() {
-      try {
-        const data = await getMetrics();
-        if (active) setMetrics(normalize(Array.isArray(data) ? data : [], idToName));
-      } catch (err) {
-        console.error("Failed to load metrics", err);
-      }
-    }
-
-    load();
-    const id = setInterval(load, POLL_MS);
-    return () => {
-      active = false;
-      clearInterval(id);
-    };
-  }, [idToName]);
-
-  useEffect(() => {
-    let active = true;
-    async function refresh() {
-      try {
-        const data = await getMetrics();
-        if (active) setMetrics(normalize(Array.isArray(data) ? data : [], idToName));
-      } catch (err) {
-        console.error("Failed to refresh metrics", err);
-      }
-    }
-    if (refreshKey) refresh();
-    return () => {
-      active = false;
-    };
-  }, [refreshKey, idToName]);
-
   const { chartData, apiKeys, colorMap } = useMemo(() => {
-    const ordered = [...metrics]
+    const ordered = normalize(Array.isArray(metrics) ? metrics : [], idToName)
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
       .slice(-MAX_POINTS);
 
@@ -116,7 +81,7 @@ export default function MetricsDashboard({ refreshKey = 0, apis = [] }) {
     });
 
     return { chartData: data, apiKeys: keys, colorMap: map };
-  }, [metrics]);
+  }, [metrics, idToName]);
 
   return (
     <section className="mx-auto mt-10 max-w-7xl px-6">
@@ -126,7 +91,7 @@ export default function MetricsDashboard({ refreshKey = 0, apis = [] }) {
             Request Metrics
           </h3>
           <span className="text-xs text-[var(--color-secondary-text)]">
-            Live • updates every {POLL_MS / 1000}s
+            {isLoading ? "Carregando..." : `Live • updates every ${pollMs / 1000}s`}
           </span>
         </div>
 

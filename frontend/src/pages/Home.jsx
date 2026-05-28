@@ -9,13 +9,18 @@ import useChangeTheme from "../hooks/useChangeTheme";
 import { getApis, probeApi } from "../services/api";
 import Notification from "../components/Notification";
 import MetricsDashboard from "../components/MetricsDashboard";
+import MetricsHistory from "../components/MetricsHistory";
+import useNotifications from "../hooks/useNotifications";
+import useMetrics from "../hooks/useMetrics";
 
 export default function Home() {
   const { darkMode, setDarkMode } = useChangeTheme();
-  const [notifications, setNotifications] = useState([]);
+  const { notifications, pushNotification, dismissNotification } = useNotifications();
   const [activeCategory, setActiveCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [apis, setApis] = useState([]);
-  const [metricsRefreshKey, setMetricsRefreshKey] = useState(0);
+  const [loadingById, setLoadingById] = useState({});
+  const { metrics, isLoading: metricsLoading, appendMetric, pollMs } = useMetrics();
 
   useEffect(() => {
     let active = true;
@@ -36,67 +41,100 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    if (notifications.length === 0) return;
-
-    const timers = notifications.map((n) => setTimeout(() => {
-      setNotifications((prev) => prev.filter((item) => item.id !== n.id))
-    }, 2500)
-    )
-    return () => timers.forEach(clearTimeout);
-  }, [notifications])
-
   const categories = useMemo(() => {
     const unique = Array.from(new Set(apis.map((api) => api.category))).filter(Boolean);
     return ["All", ...unique];
   }, [apis])
 
   const filteredApis = useMemo(() => {
-    if (activeCategory === "All") return apis;
-    return apis.filter((api) => api.category === activeCategory);
-  }, [activeCategory, apis]);
+    const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const pushNotification = (type, message) => {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    setNotifications((prev) => [{ id, type, message }, ...prev].slice(0, 4));
-  };
+    return apis.filter((api) => {
+      const matchesCategory = activeCategory === "All" || api.category === activeCategory;
+      if (!normalizedQuery) return matchesCategory;
+      const haystack = [api.name, api.description, api.category].join(" ").toLowerCase();
+      return matchesCategory && haystack.includes(normalizedQuery);
+    });
+  }, [activeCategory, apis, searchQuery]);
+
+  const lastResultById = useMemo(() => {
+    return metrics.reduce((acc, metric) => {
+      if (metric?.id) acc[metric.id] = metric;
+      return acc;
+    }, {});
+  }, [metrics]);
 
   const handleTryOut = async (api) => {
     try {
-      await probeApi(api.id);
-      pushNotification("success", `Request succeeded: ${api.name}`);
+      setLoadingById((prev) => ({ ...prev, [api.id]: true }));
+      const result = await probeApi(api.id);
+      appendMetric(result);
+
+      if (result?.ok) {
+        pushNotification("success", `Request succeeded: ${api.name}`);
+      } else {
+        const details =
+          result?.error ||
+          (result?.status ? `HTTP ${result.status}` : null) ||
+          "Request failed";
+        pushNotification("error", `${api.name}: ${details}`);
+      }
     } catch (err) {
       console.error("Probe failed", err);
       const message = err?.response?.data?.message || err?.message || "Request failed";
+      appendMetric({
+        id: api.id,
+        name: api.name,
+        status: null,
+        latencyMs: null,
+        ok: false,
+        error: message,
+        checkedAt: new Date().toISOString(),
+      });
       pushNotification("error", `${api.name}: ${message}`);
     } finally {
-      // Sinaliza o MetricsDashboard para buscar os dados atualizados imediatamente
-      setMetricsRefreshKey((k) => k + 1);
+      setLoadingById((prev) => ({ ...prev, [api.id]: false }));
     }
   };
 
   return (
     <ReactiveBackground>
-      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-      <main>
-        <div className="pointer-events-none fixed right-6 top-6 z-50 flex w-[340px] flex-col gap-3">
-          {notifications.map((n) => (
-            <Notification
-              key={n.id}
-              type={n.type}
-              message={n.message}
-              onClose={() => setNotifications((prev) => prev.filter((item) => item.id !== n.id))}
-            />
-          ))}
-        </div>
-        <Hero />
-        <MetricsDashboard refreshKey={metricsRefreshKey} apis={apis} />
-        <CategoryFilter
-          categories={categories}
-          activeCategory={activeCategory}
-          onChange={setActiveCategory}
+        <Header
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
-        <ApiList apis={filteredApis} onTryOut={handleTryOut} />
+        <main>
+          <div className="pointer-events-none fixed right-6 top-6 z-50 flex w-[340px] flex-col gap-3">
+            {notifications.map((n) => (
+              <Notification
+                key={n.id}
+                type={n.type}
+                message={n.message}
+                onClose={() => dismissNotification(n.id)}
+              />
+            ))}
+          </div>
+          <Hero />
+          <MetricsDashboard
+            metrics={metrics}
+            apis={apis}
+            isLoading={metricsLoading}
+            pollMs={pollMs}
+          />
+          <MetricsHistory metrics={metrics} apis={apis} isLoading={metricsLoading} />
+          <CategoryFilter
+            categories={categories}
+            activeCategory={activeCategory}
+            onChange={setActiveCategory}
+          />
+        <ApiList
+          apis={filteredApis}
+          onTryOut={handleTryOut}
+          results={lastResultById}
+          loadingById={loadingById}
+        />
       </main>
     </ReactiveBackground>
   );

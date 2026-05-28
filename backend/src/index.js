@@ -12,6 +12,7 @@ const { swaggerSpec } = require('./config/swagger');
 const apisRouter    = require('./routes/apis');
 const probeRouter   = require('./routes/probe');
 const metricsRouter = require('./routes/metrics');
+const swaggerRouter = require('./routes/swagger');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ app.get('/health', (req, res) => {
 app.use('/api/apis',    apisRouter);
 app.use('/api/probe',   probeRouter);
 app.use('/api/metrics', metricsRouter);
+app.use('/api/swagger', swaggerRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

@@ -20,7 +20,7 @@ import { BatchSpanProcessor }         from '@opentelemetry/sdk-trace-web';
 import { ZoneContextManager }         from '@opentelemetry/context-zone';
 import { registerInstrumentations }   from '@opentelemetry/instrumentation';
 import { FetchInstrumentation }       from '@opentelemetry/instrumentation-fetch';
-import { Resource }                   from '@opentelemetry/resources';
+import { resourceFromAttributes }     from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME,
          ATTR_SERVICE_VERSION }       from '@opentelemetry/semantic-conventions';
 import { trace }                      from '@opentelemetry/api';
@@ -64,7 +64,7 @@ export function initTelemetry() {
   }
 
   // ── Resource: identifica o serviço no Dynatrace ──────────────────────────
-  const resource = new Resource({
+  const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]:    import.meta.env.VITE_OTEL_SERVICE_NAME || 'api-monitor-frontend',
     [ATTR_SERVICE_VERSION]: import.meta.env.VITE_APP_VERSION       || '1.0.0',
     'deployment.environment': import.meta.env.MODE || 'development',

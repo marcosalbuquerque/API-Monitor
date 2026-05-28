@@ -99,6 +99,7 @@ cp backend/.env.example backend/.env
 | `GET` | `/api/apis` | Lista de APIs do catálogo |
 | `POST` | `/api/probe/:id` | Dispara health check em uma API |
 | `GET` | `/api/metrics` | Histórico de checagens da sessão |
+| `GET` | `/api/swagger/:id` | Swagger UI da API selecionada |
 
 ---
 
@@ -166,6 +167,11 @@ Não são necessárias variáveis de ambiente obrigatórias para o deploy básic
 
 ```
 api-monitor/
+├── api/                         # Vercel Functions (deploy)
+│   ├── apis.js                  # GET /api/apis
+│   ├── probe/
+│   │   └── [id].js              # POST /api/probe/:id
+│   └── metrics.js               # GET /api/metrics
 ├── frontend/                    # React + Vite
 │   └── src/
 │       ├── components/
