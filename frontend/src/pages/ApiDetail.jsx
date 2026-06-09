@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
+import ReactiveBackground from "../components/ReactiveBackground";
 import CategoryBadge from "../components/CategoryBadge";
 import Header from "../components/Header";
 import MetricsDashboard from "../components/MetricsDashboard";
@@ -114,7 +114,7 @@ export default function ApiDetail() {
   };
 
   return (
-    <>
+    <ReactiveBackground>
       <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <main className="mx-auto max-w-7xl px-6 pb-16 pt-10">
@@ -260,6 +260,6 @@ export default function ApiDetail() {
           </>
         )}
       </main>
-    </>
+    </ReactiveBackground>
   );
 }
