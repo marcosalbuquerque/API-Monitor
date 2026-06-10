@@ -17,7 +17,7 @@ const swaggerOptions = {
       },
     ],
     paths: {
-      '/health': {
+      '/api/health': {
         get: {
           summary: 'Verifica saúde do backend',
           responses: {
