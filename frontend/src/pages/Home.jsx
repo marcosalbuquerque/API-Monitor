@@ -12,6 +12,7 @@ import MetricsDashboard from "../components/MetricsDashboard";
 import MetricsHistory from "../components/MetricsHistory";
 import useNotifications from "../hooks/useNotifications";
 import useMetrics from "../hooks/useMetrics";
+import { logger } from "../utils/logger";
 
 export default function Home() {
   const { darkMode, setDarkMode } = useChangeTheme();
@@ -30,7 +31,7 @@ export default function Home() {
         const data = await getApis();
         if (active) setApis(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Failed to load APIs", err);
+        logger.error("Failed to load APIs", err);
         if (active) setApis([]);
       }
     }
@@ -65,22 +66,23 @@ export default function Home() {
   }, [metrics]);
 
   const handleTryOut = async (api) => {
+    setLoadingById((prev) => ({ ...prev, [api.id]: true }));
     try {
-      setLoadingById((prev) => ({ ...prev, [api.id]: true }));
-      const result = await probeApi(api.id);
-      appendMetric(result);
+      await logger.trackAction(`Try Out API - ${api.name}`, async () => {
+        const result = await probeApi(api.id);
+        appendMetric(result);
 
-      if (result?.ok) {
-        pushNotification("success", `Request succeeded: ${api.name}`);
-      } else {
-        const details =
-          result?.error ||
-          (result?.status ? `HTTP ${result.status}` : null) ||
-          "Request failed";
-        pushNotification("error", `${api.name}: ${details}`);
-      }
+        if (result?.ok) {
+          pushNotification("success", `Request succeeded: ${api.name}`);
+        } else {
+          const details =
+            result?.error ||
+            (result?.status ? `HTTP ${result.status}` : null) ||
+            "Request failed";
+          pushNotification("error", `${api.name}: ${details}`);
+        }
+      });
     } catch (err) {
-      console.error("Probe failed", err);
       const message = err?.response?.data?.message || err?.message || "Request failed";
       appendMetric({
         id: api.id,

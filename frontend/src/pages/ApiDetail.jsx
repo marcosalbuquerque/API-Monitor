@@ -10,6 +10,7 @@ import useChangeTheme from "../hooks/useChangeTheme";
 import useMetrics from "../hooks/useMetrics";
 import useNotifications from "../hooks/useNotifications";
 import { getApis, probeApi } from "../services/api";
+import { logger } from "../utils/logger";
 
 export default function ApiDetail() {
   const { id } = useParams();
@@ -31,7 +32,8 @@ export default function ApiDetail() {
         if (!active) return;
         const found = Array.isArray(data) ? data.find((item) => item.id === id) : null;
         setApi(found || null);
-      } catch {
+      } catch (err) {
+        logger.error(`Failed to load API detail for ID: ${id}`, err);
         if (!active) return;
         setApi(null);
       } finally {
@@ -53,7 +55,8 @@ export default function ApiDetail() {
         const response = await fetch(`/api/swagger/${id}`);
         if (!active) return;
         setSwaggerAvailable(response.ok);
-      } catch {
+      } catch (err) {
+        logger.warn(`Swagger unavailable for API: ${id}`);
         if (!active) return;
         setSwaggerAvailable(false);
       }
@@ -82,20 +85,22 @@ export default function ApiDetail() {
 
   const handleTryOut = async () => {
     if (!api) return;
+    setIsProbing(true);
     try {
-      setIsProbing(true);
-      const result = await probeApi(api.id);
-      appendMetric(result);
+      await logger.trackAction(`Try Out API Details - ${api.name}`, async () => {
+        const result = await probeApi(api.id);
+        appendMetric(result);
 
-      if (result?.ok) {
-        pushNotification("success", `Request succeeded: ${api.name}`);
-      } else {
-        const details =
-          result?.error ||
-          (result?.status ? `HTTP ${result.status}` : null) ||
-          "Request failed";
-        pushNotification("error", `${api.name}: ${details}`);
-      }
+        if (result?.ok) {
+          pushNotification("success", `Request succeeded: ${api.name}`);
+        } else {
+          const details =
+            result?.error ||
+            (result?.status ? `HTTP ${result.status}` : null) ||
+            "Request failed";
+          pushNotification("error", `${api.name}: ${details}`);
+        }
+      });
     } catch (err) {
       const message = err?.response?.data?.message || err?.message || "Request failed";
       appendMetric({
