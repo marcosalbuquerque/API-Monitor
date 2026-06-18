@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getMetrics } from "../services/api";
 
@@ -9,10 +9,23 @@ export default function useMetrics({ pollMs = DEFAULT_POLL_MS } = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Ref para manter as métricas locais entre polls sem causar re-renders
+  const localRef = useRef([]);
+
   const refresh = useCallback(async () => {
     try {
       const data = await getMetrics();
-      setMetrics(Array.isArray(data) ? data : []);
+      const remote = Array.isArray(data) ? data : [];
+
+      // Mescla: mantém locais que não estão no remoto (ambiente stateless)
+      const remoteKeys = new Set(remote.map((m) => m.checkedAt + m.id));
+      const onlyLocal = localRef.current.filter(
+        (m) => !remoteKeys.has(m.checkedAt + m.id)
+      );
+      const merged = [...remote, ...onlyLocal];
+
+      localRef.current = merged;
+      setMetrics(merged);
       setError(null);
     } catch (err) {
       setError(err);
@@ -28,7 +41,18 @@ export default function useMetrics({ pollMs = DEFAULT_POLL_MS } = {}) {
       try {
         const data = await getMetrics();
         if (!active) return;
-        setMetrics(Array.isArray(data) ? data : []);
+
+        const remote = Array.isArray(data) ? data : [];
+
+        // Mesclagem: nunca descarta métricas locais quando o servidor retorna vazio
+        const remoteKeys = new Set(remote.map((m) => m.checkedAt + m.id));
+        const onlyLocal = localRef.current.filter(
+          (m) => !remoteKeys.has(m.checkedAt + m.id)
+        );
+        const merged = [...remote, ...onlyLocal];
+
+        localRef.current = merged;
+        setMetrics(merged);
         setError(null);
       } catch (err) {
         if (!active) return;
@@ -48,6 +72,8 @@ export default function useMetrics({ pollMs = DEFAULT_POLL_MS } = {}) {
 
   const appendMetric = useCallback((metric) => {
     if (!metric) return;
+    // Adiciona localmente para resposta imediata na UI
+    localRef.current = [...localRef.current, metric];
     setMetrics((prev) => [...prev, metric]);
   }, []);
 
